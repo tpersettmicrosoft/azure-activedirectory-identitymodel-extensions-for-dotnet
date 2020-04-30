@@ -1852,6 +1852,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 return new TheoryData<JwtTheoryData>
                 {
+                     new JwtTheoryData
+                    {
+                        TestId = nameof(Default.AsymmetricJws) + "RequireSignedTokens",
+                        Token = Default.AsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            IssuerSigningKey = Default.AsymmetricSigningKey,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
                     new JwtTheoryData
                     {
                         TestId = nameof(Default.SymmetricJws) + "RequireSignedTokens",

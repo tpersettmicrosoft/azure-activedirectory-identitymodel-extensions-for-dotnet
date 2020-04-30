@@ -349,5 +349,62 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // if it reaches here, token type was succcessfully validated.
             LogHelper.LogInformation(TokenLogMessages.IDX10258, type);
         }
+
+        /// <summary>
+        /// Returns a <see cref="SecurityKey"/> to use when validating the signature of a token.
+        /// </summary>
+        /// <param name="kid">The <see cref="string"/> kid field of the token being validated</param>
+        /// <param name="x5t">The <see cref="string"/> x5t field of the token being validated</param>
+        /// <param name="jwtToken">The <see cref="SecurityToken"/> that is being validated.</param>
+        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
+        /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
+        /// <remarks>If key fails to resolve, then null is returned</remarks>
+        internal static SecurityKey ResolveTokenSigningKey(string kid, string x5t, SecurityToken jwtToken,TokenValidationParameters validationParameters)
+        {
+
+            if (!string.IsNullOrEmpty(kid))
+            {              
+                if (validationParameters.IssuerSigningKey != null
+                    && string.Equals(validationParameters.IssuerSigningKey.KeyId, kid, validationParameters.IssuerSigningKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                    return validationParameters.IssuerSigningKey;
+
+                if (validationParameters.IssuerSigningKeys != null)
+                {
+                    foreach (SecurityKey signingKey in validationParameters.IssuerSigningKeys)
+                    {
+                        if (signingKey != null && string.Equals(signingKey.KeyId, kid, signingKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                        {
+                            return signingKey;
+                        }
+                    }
+                }
+            }
+
+            if (!string.IsNullOrEmpty(x5t))
+            {
+                if (validationParameters.IssuerSigningKey != null)
+                {
+                    if (string.Equals(validationParameters.IssuerSigningKey.KeyId, x5t, validationParameters.IssuerSigningKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                        return validationParameters.IssuerSigningKey;
+
+                    X509SecurityKey x509Key = validationParameters.IssuerSigningKey as X509SecurityKey;
+                    if (x509Key != null && string.Equals(x509Key.X5t, x5t, StringComparison.OrdinalIgnoreCase))
+                        return validationParameters.IssuerSigningKey;
+                }
+
+                if (validationParameters.IssuerSigningKeys != null)
+                {
+                    foreach (SecurityKey signingKey in validationParameters.IssuerSigningKeys)
+                    {
+                        if (signingKey != null && string.Equals(signingKey.KeyId, x5t, StringComparison.Ordinal))
+                        {
+                            return signingKey;
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
     }
 }

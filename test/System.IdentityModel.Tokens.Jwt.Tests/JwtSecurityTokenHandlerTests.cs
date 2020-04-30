@@ -73,6 +73,23 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 validationParameters.ValidateActor = true;
                 theoryData.Add(
                     new JwtTheoryData
+                    {
+                        TestId = "ActorValidationUsingTVP - True",
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        Token = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
+                        TokenHandler = handler,
+                        ValidationParameters = validationParameters
+                    }
+                );
+
+                // Actor validation is true
+                // Actor will be validated using validationParameters since validationsParameters.ActorValidationParameters is null
+                claimsIdentity = new ClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
+                claimsIdentity.AddClaim(new Claim(ClaimTypes.Actor, Default.AsymmetricJwt));
+                validationParameters = Default.AsymmetricSignTokenValidationParameters;
+                validationParameters.ValidateActor = true;
+                theoryData.Add(
+                    new JwtTheoryData
                     { 
                         TestId = "ActorValidationUsingTVP - True",
                         ExpectedException = ExpectedException.NoExceptionExpected,
